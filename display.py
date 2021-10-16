@@ -34,7 +34,7 @@ class FIIConsole:
 
 
         if not manual:
-            self.lst_updt_var = tk.StringVar(value="Last Updated: ")
+            self.lst_updt_var = tk.StringVar(value="Last Updated: Loading...")
             self.last_updated = tk.Label(self.root, textvariable=self.lst_updt_var, font=('Britannic', 11))
             self.last_updated.pack()
         self.__columns = ('#1', '#2')
