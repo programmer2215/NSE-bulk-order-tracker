@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import scrape
 import datetime
+import threading
 
 def extract_data():
 
@@ -24,15 +25,19 @@ tree.heading('#2', text='Count')
 tree.pack()
 
 def map_data():
-    tree.delete(*tree.get_children())
     extracted_data = extract_data()
+    tree.delete(*tree.get_children())
     for line in extracted_data:
         tree.insert("", tk.END, value=line)
     now = datetime.datetime.now().strftime("%H:%M:%S")
 
     lst_updt_var.set("Last Updated: " + now)
-    root.after(60000, map_data)
+    
 
-map_data()
+def refresh():
+    threading.Thread(target=map_data, daemon=True).start()
+    root.after(120000, refresh)
+
+refresh()
 
 root.mainloop()
