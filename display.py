@@ -9,7 +9,6 @@ import openpyxl
 class FIIConsole:
     def __init__(self, root, manual=True):
 
-        # Tkinter Bug Work Around
     
         self.root = root
         self.manual = manual
@@ -18,7 +17,8 @@ class FIIConsole:
         self.style = ttk.Style()
         self.style.configure("Treeview", font=('Britannic', 11, 'bold'), rowheight=25)
         self.style.configure("Treeview.Heading", font=('Britannic' ,13, 'bold'))
-
+        
+        # Tkinter Bug Work Around
         if self.root.getvar('tk_patchLevel')=='8.6.9': #and OS_Name=='nt':
             def fixed_map(option):
                 # Fix for setting text colour for Tkinter 8.6.9
@@ -69,8 +69,10 @@ class FIIConsole:
         self.tree.delete(*self.tree.get_children())
         for i, line in enumerate(self.__sorted_data):
             self.tree.insert("", tk.END, iid=i, value=line)
+        
         for i in range(5):
             self.tree.item(i, tags="top5")
+
 
         
             
@@ -90,8 +92,11 @@ class FIIConsole:
         self.tree.delete(*self.tree.get_children())
         for i, line in enumerate(self.__extracted_data):
             self.tree.insert("", tk.END, iid=i, value=line)
-        for i in range(5):
-            self.tree.item(i, tags="top5")
+        try:
+            for i in range(5):
+                self.tree.item(i, tags="top5")
+        except tk.TclError:
+            print("No Data")
         if not self.manual:
             now = datetime.datetime.now().strftime("%H:%M:%S")
             self.lst_updt_var.set("Last Updated: " + now)
