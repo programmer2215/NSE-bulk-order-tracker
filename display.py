@@ -12,6 +12,9 @@ class FIIConsole:
     
         self.root = root
         self.manual = manual
+        self.delay = 120000
+        self.override = False
+        self.active_process = False
         self.root.title("Script Frequency")
         self.root.iconbitmap('icon.ico')
         self.style = ttk.Style()
@@ -50,6 +53,16 @@ class FIIConsole:
             self.open_button.pack()
             self.load_data_button = ttk.Button(self.root, text='Load Data', command=self.load_data)
             self.load_data_button.pack()
+        else:
+            self.control_frame = tk.Frame(root)
+            self.control_frame.pack(padx=5, pady=10)
+            self.refresh_button = ttk.Button(self.control_frame, text='Refresh', command=self.manual_refresh)
+            self.refresh_button.grid(column=0, row=0, padx=2)
+            self.delay_var = tk.StringVar()
+            self.delay_input = ttk.Entry(self.control_frame, textvariable=self.delay_var, width=8)
+            self.delay_input.grid(column=1, row=0, padx=2)
+            self.set_delay_btn = ttk.Button(self.control_frame, text="Set delay", command=self.set_delay)
+            self.set_delay_btn.grid(column=2, row=0, padx=2)
     
     def open_file(self):
         os.system('start excel.exe data.xlsx')
@@ -102,8 +115,35 @@ class FIIConsole:
             self.lst_updt_var.set("Last Updated: " + now)
     
     def refresh(self):
-        threading.Thread(target=self.map_data, daemon=True).start()
-        self.root.after(120000, self.refresh)
+        if not self.override:
+            self.active_process = True
+            print("auto process started")
+            self.t1 = threading.Thread(target=self.map_data, daemon=True)
+            self.t1.start()
+            threading.Thread(target=self.setStateActiveProcess, daemon=True).start()
+        else:
+            print("Process paused.")
+        self.root.after(self.delay, self.refresh)
+    
+    def manual_refresh(self):
+        if not self.active_process:
+            self.override = True
+            self.t2 = threading.Thread(target=self.map_data, daemon=True)
+            self.t2.start()
+            threading.Thread(target=self.setStateOverride, daemon=True).start()
+        else:
+            print("Override denied")
+    
+    def setStateActiveProcess(self):
+        while self.t1.is_alive():
+                pass
+        self.active_process = False
 
+    def setStateOverride(self):
+        while self.t2.is_alive():
+                pass
+        self.override = False
 
-
+    def set_delay(self):
+        self.delay = int(self.delay_var.get()) * 60 * 1000
+        print(f"set delay to {self.delay}")
