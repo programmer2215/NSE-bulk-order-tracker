@@ -12,7 +12,9 @@ class FIIConsole:
     
         self.root = root
         self.manual = manual
-        self.delay = 120000
+        with open("settings.txt", "r") as f:
+            self.delay_mins = f.read()
+            self.delay = int(self.delay_mins) * 60 * 1000
         self.override = False
         self.active_process = False
         self.root.title("Script Frequency")
@@ -58,7 +60,7 @@ class FIIConsole:
             self.control_frame.pack(padx=5, pady=10)
             self.refresh_button = ttk.Button(self.control_frame, text='Refresh', command=self.manual_refresh)
             self.refresh_button.grid(column=0, row=0, padx=2)
-            self.delay_var = tk.StringVar()
+            self.delay_var = tk.StringVar(value=self.delay_mins)
             self.delay_input = ttk.Entry(self.control_frame, textvariable=self.delay_var, width=8)
             self.delay_input.grid(column=1, row=0, padx=2)
             self.set_delay_btn = ttk.Button(self.control_frame, text="Set delay", command=self.set_delay)
@@ -145,5 +147,8 @@ class FIIConsole:
         self.override = False
 
     def set_delay(self):
-        self.delay = int(self.delay_var.get()) * 60 * 1000
+        new_delay = self.delay_var.get()
+        self.delay = int(new_delay) * 60 * 1000
+        with open("settings.txt", "w") as f:
+            f.write(new_delay)
         print(f"set delay to {self.delay}")
